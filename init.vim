@@ -55,8 +55,8 @@ Plug 'nvim-lua/lsp_extensions.nvim'
 " Autocompletion framework for built-in LSP
 Plug 'nvim-lua/completion-nvim'
 
-" Rust lintting
-Plug 'rust-lang/rust.vim'
+" Language parser
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 call plug#end()
 
 let mapleader=" "
@@ -86,6 +86,11 @@ augroup END
 " https://github.com/neovim/nvim-lspconfig
 " Rust: install https://github.com/rust-analyzer/rust-analyzer
 " Python: npm i -g pyright
+" Html: npm install -g vscode-html-languageserver-bin
+" Css: npm install -g vscode-css-languageserver-bin
+" Json: npm install -g vscode-json-languageserver
+" TypescriptJavascript: npm install -g typescript-language-server
+" Ruby: gem install solargraph
 lua <<EOF
 
 -- nvim_lsp object
@@ -96,9 +101,15 @@ local on_attach = function(client)
     require'completion'.on_attach(client)
 end
 
--- Enable rust_analyzer
+-- Enable language servers
 nvim_lsp.rust_analyzer.setup({ on_attach=on_attach })
 nvim_lsp.pyright.setup({ on_attach=on_attach })
+nvim_lsp.html.setup({ on_attach=on_attach })
+nvim_lsp.cssls.setup({ on_attach=on_attach })
+nvim_lsp.tsserver.setup({ on_attach=on_attach })
+nvim_lsp.jsonls.setup({ on_attach=on_attach })
+nvim_lsp.solargraph.setup({ on_attach=on_attach })
+
 
 -- Enable diagnostics
 vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
@@ -108,6 +119,15 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     update_in_insert = true,
   }
 )
+EOF
+
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = {"html", "javascript", "typescript",  "json", "css", "cpp", "c", "rust", "python", "ruby"}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  highlight = {
+    enable = true, -- false will disable the whole extension
+  },
+}
 EOF
 
 "
